@@ -3,112 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>词语练习小测验</title>
+    <title>四年级单元二：棋王的心事</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #fdf2f8; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
-        .quiz-card { background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; }
-        .quiz-card.active { display: block; animation: slideIn 0.5s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; font-size: 1.1rem; }
-        .option-btn:hover { border-color: #ec4899; background-color: #fdf2f8; }
-        .correct { background-color: #d1fae5 !important; border-color: #10b981 !important; color: #065f46; }
-        .incorrect { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f1f5f9; }
+        .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: bold; }
+        .indent-2 { text-indent: 2em; }
+        .diary-paper { 
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+        .diary-paper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 40px; height: 100%; width: 1px;
+            background: #fee2e2;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-2xl mx-auto">
-        <div id="welcome-screen" class="text-center py-20 bg-white rounded-3xl shadow-lg px-6">
-            <h1 class="text-4xl font-bold text-pink-600 mb-6">词语练习小测验 📝</h1>
-            <p class="text-gray-600 mb-8 text-xl">准备好测试你的学习成果了吗？一共 10 道题。</p>
-            <button onclick="startQuiz()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition-transform hover:scale-105">开始挑战</button>
-        </div>
+<body class="text-gray-800">
 
-        <div id="quiz-container"></div>
-
-        <div id="result-screen" class="hidden text-center py-20 bg-white rounded-3xl shadow-lg px-6">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">测试完成！</h2>
-            <div class="text-6xl font-bold text-pink-500 mb-6" id="final-score">0 / 10</div>
-            <p class="text-xl text-gray-600 mb-8" id="feedback-text"></p>
-            <button onclick="location.reload()" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-full">重新开始</button>
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 flex justify-between items-center h-16">
+            <h1 class="text-xl font-bold text-emerald-600">《棋王的心事》</h1>
+            <div class="flex space-x-4 h-full">
+                <button onclick="showTab('lesson')" id="tab-lesson" class="tab-active px-2 h-full">课文解析</button>
+                <button onclick="showTab('words')" id="tab-words" class="text-gray-500 px-2 h-full">词语认识</button>
+                <button onclick="showTab('game')" id="tab-game" class="text-gray-500 px-2 h-full">连线游戏</button>
+                <button onclick="showTab('diary')" id="tab-diary" class="text-gray-500 px-2 h-full">日记范文</button>
+            </div>
         </div>
-    </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6">
+        
+        <!-- 1. 课文解析 -->
+        <section id="view-lesson" class="space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-8 border-emerald-500">
+                <h2 class="text-xl font-bold mb-4">为什么文轩不开心？</h2>
+                <p class="text-gray-700 leading-relaxed">
+                    文轩被称为“小棋王”，但他最近产生了一件心事：他在一场重要的<strong>象棋比赛中输了</strong>。失败的<strong>滋味</strong>让他感到很<strong>焦虑</strong>，他害怕面对别人的目光，甚至想拉开与象棋的<strong>距离</strong>。
+                </p>
+            </div>
+            <div class="bg-emerald-50 p-6 rounded-xl">
+                <h3 class="font-bold text-emerald-800 mb-2 text-lg">核心道理</h3>
+                <p class="text-emerald-700">胜败是兵家常事，<strong>况且</strong>失败能让我们发现自己的弱点，从而让技艺更上一层楼。</p>
+            </div>
+        </section>
+
+        <!-- 2. 词语认识 -->
+        <section id="view-words" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm text-center border hover:border-emerald-300">
+                <div class="text-xl font-bold text-emerald-600">滋味</div>
+                <div class="text-sm text-gray-500 italic">Rasa</div>
+                <div class="text-xs mt-2 text-gray-400">例：失败的滋味很苦涩。</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm text-center border hover:border-emerald-300">
+                <div class="text-xl font-bold text-emerald-600">焦虑</div>
+                <div class="text-sm text-gray-500 italic">Gelisah / Bimbang</div>
+                <div class="text-xs mt-2 text-gray-400">例：他为明天的考试感到焦虑。</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm text-center border hover:border-emerald-300">
+                <div class="text-xl font-bold text-emerald-600">距离</div>
+                <div class="text-sm text-gray-500 italic">Jarak</div>
+                <div class="text-xs mt-2 text-gray-400">例：我们要保持社交距离。</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm text-center border hover:border-emerald-300">
+                <div class="text-xl font-bold text-emerald-600">况且</div>
+                <div class="text-sm text-gray-500 italic">Lagipun / Tambahan pula</div>
+                <div class="text-xs mt-2 text-gray-400">例：外面下雨，况且你还没吃药。</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm text-center border hover:border-emerald-300">
+                <div class="text-xl font-bold text-emerald-600">紧密</div>
+                <div class="text-sm text-gray-500 italic">Rapat / Erat</div>
+                <div class="text-xs mt-2 text-gray-400">例：两国的合作非常紧密。</div>
+            </div>
+        </section>
+
+        <!-- 3. 连线游戏 -->
+        <section id="view-game" class="hidden">
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-center mb-6 text-gray-500">点击左边词语，再点右边意思进行配对</p>
+                <div class="flex justify-around gap-8">
+                    <div id="game-left" class="space-y-4 w-1/3"></div>
+                    <div id="game-right" class="space-y-4 w-1/2"></div>
+                </div>
+                <div id="game-win" class="hidden text-center mt-8 p-4 bg-emerald-100 text-emerald-800 font-bold rounded-lg">
+                    🎊 太棒了！全部配对正确！
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 日记范文 -->
+        <section id="view-diary" class="hidden space-y-8">
+            <!-- 日记格式教学 -->
+            <div class="bg-amber-50 border-2 border-dashed border-amber-200 p-6 rounded-xl">
+                <h3 class="text-lg font-bold text-amber-800 mb-4 flex items-center">
+                    <span class="mr-2">📝</span> 日记格式要记牢：
+                </h3>
+                <ul class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-amber-700">
+                    <li class="flex items-start">
+                        <span class="bg-amber-200 text-amber-900 rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5 text-xs">1</span>
+                        <span>第一行写上：<strong>日期、星期、天气</strong>。</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-amber-200 text-amber-900 rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5 text-xs">2</span>
+                        <span>正文每一段开头必须<strong>空两个空格</strong>。</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-amber-200 text-amber-900 rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5 text-xs">3</span>
+                        <span>记录当天的<strong>事情</strong>和<strong>感受</strong>。</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 简洁范文展示 -->
+            <div class="diary-paper p-8 sm:p-12 shadow-xl max-w-2xl mx-auto rounded-sm min-h-[350px]">
+                <div class="border-b-2 border-emerald-100 pb-2 mb-6 font-bold flex gap-4 text-gray-600">
+                    <span>2024年5月10日</span>
+                    <span>星期五</span>
+                    <span>晴</span>
+                </div>
+                <div class="space-y-6 text-lg leading-loose text-gray-700">
+                    <p class="indent-2">
+                        今天我非常难过，因为我在象棋比赛中<strong>输了</strong>。这种失败的<strong>滋味</strong>真不好受，让我感到很<strong>焦虑</strong>。
+                    </p>
+                    <p class="indent-2">
+                        老师告诉我，输赢并不重要，<strong>况且</strong>失败能让我进步。听了老师的话，我决定继续努力。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
 
     <script>
-        const quizData = [
-            { q: "“疑难杂症”这个词通常用来比喻什么？", options: ["很容易就能处理的小事情", "棘手或难以解决的问题", "非常罕见的各种艺术作品", "大家都很喜欢的体育运动"], correct: 1 },
-            { q: "“下棋的技艺”可以用哪一个词来概括？", options: ["协调", "挨", "棋艺", "拒绝"], correct: 2 },
-            { q: "如果你想表达某件事物看起来“好像、似乎”是某种样子，你会用哪个词？", options: ["距离", "仿佛", "输", "孤零零"], correct: 1 },
-            { q: "“配合得适当”是指以下哪个词？", options: ["协调", "勾肩搭背", "拒绝", "棋艺"], correct: 0 },
-            { q: "在比赛中没有获得胜利，也就是“失败”了，可以用哪个字表示？", options: ["挨", "赢", "输", "走"], correct: 2 },
-            { q: "当别人送你礼物但你“不接受”时，你是在做什么？", options: ["距离", "拒绝", "协调", "仿佛"], correct: 1 },
-            { q: "“两者相隔的空间”或者“差距”被称为什么？", options: ["距离", "疑难杂症", "挨", "棋艺"], correct: 0 },
-            { q: "形容一个人“孤单，无依无靠”，没有人在身边陪衬，用哪个词最贴切？", options: ["勾肩搭背", "协调", "仿佛", "孤零零"], correct: 3 },
-            { q: "“挨”在图片中的解释是什么？", options: ["被打了一顿", "靠近；紧接着", "离开很远", "一种食物的名称"], correct: 1 },
-            { q: "“勾肩搭背”通常用来形容什么样的关系？", options: ["互不相识的陌生人", "水火不容的敌人", "关系亲密密切的朋友", "上下级的领导关系"], correct: 2 }
+        const words = [
+            { zh: "滋味", ms: "味道或内心的感受 (Rasa)" },
+            { zh: "焦虑", ms: "着急、烦恼和不安 (Gelisah)" },
+            { zh: "况且", ms: "表示更进一层 (Lagipun)" },
+            { zh: "紧密", ms: "结合得很紧 (Erat)" },
+            { zh: "距离", ms: "时间或空间的间隔 (Jarak)" }
         ];
 
-        let currentStep = 0;
-        let score = 0;
-
-        function startQuiz() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            renderQuestion();
-        }
-
-        function renderQuestion() {
-            const container = document.getElementById('quiz-container');
-            const data = quizData[currentStep];
-            
-            let optionsHtml = '';
-            data.options.forEach((opt, index) => {
-                optionsHtml += `<button onclick="checkAnswer(${index})" class="option-btn" id="opt-${index}">${opt}</button>`;
+        function showTab(tab) {
+            ['lesson', 'words', 'game', 'diary'].forEach(t => {
+                document.getElementById('view-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).className = "text-gray-500 px-2 h-full";
             });
-
-            container.innerHTML = `
-                <div class="quiz-card active p-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="text-pink-500 font-bold">第 ${currentStep + 1} / 10 题</span>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">${data.q}</h2>
-                    <div class="space-y-2">${optionsHtml}</div>
-                </div>
-            `;
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).className = "tab-active px-2 h-full";
+            if(tab === 'game') initGame();
         }
 
-        function checkAnswer(index) {
-            const btns = document.querySelectorAll('.option-btn');
-            btns.forEach(btn => btn.disabled = true);
+        let selected = null;
+        let count = 0;
 
-            if (index === quizData[currentStep].correct) {
-                document.getElementById(`opt-${index}`).classList.add('correct');
-                score++;
+        function initGame() {
+            count = 0;
+            selected = null;
+            document.getElementById('game-win').classList.add('hidden');
+            const left = [...words].sort(() => Math.random() - 0.5);
+            const right = [...words].sort(() => Math.random() - 0.5);
+
+            document.getElementById('game-left').innerHTML = left.map(w => `
+                <div onclick="handlePick(this, '${w.zh}', 'L')" class="p-3 border-2 rounded-lg text-center cursor-pointer hover:bg-emerald-50 transition-colors">${w.zh}</div>
+            `).join('');
+            document.getElementById('game-right').innerHTML = right.map(w => `
+                <div onclick="handlePick(this, '${w.zh}', 'R')" class="p-3 border-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition-colors text-sm">${w.ms}</div>
+            `).join('');
+        }
+
+        function handlePick(el, id, side) {
+            if(el.classList.contains('bg-gray-100')) return;
+            if(!selected) {
+                selected = { el, id, side };
+                el.classList.add('border-emerald-500', 'bg-emerald-50');
             } else {
-                document.getElementById(`opt-${index}`).classList.add('incorrect');
-                document.getElementById(`opt-${quizData[currentStep].correct}`).classList.add('correct');
-            }
-
-            setTimeout(() => {
-                currentStep++;
-                if (currentStep < quizData.length) {
-                    renderQuestion();
+                if(selected.side !== side && selected.id === id) {
+                    el.className = "p-3 bg-emerald-500 text-white rounded-lg text-center opacity-40 cursor-default";
+                    selected.el.className = "p-3 bg-emerald-500 text-white rounded-lg text-center opacity-40 cursor-default";
+                    count++;
+                    if(count === words.length) document.getElementById('game-win').classList.remove('hidden');
+                    selected = null;
                 } else {
-                    showResult();
+                    selected.el.classList.remove('border-emerald-500', 'bg-emerald-50');
+                    selected = null;
                 }
-            }, 1500);
-        }
-
-        function showResult() {
-            document.getElementById('quiz-container').innerHTML = '';
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `${score} / 10`;
-            
-            let feedback = "";
-            if(score === 10) feedback = "完美！你已经完全掌握了这些词语！🏆";
-            else if(score >= 7) feedback = "很棒！大部分词语你都记住了！🌟";
-            else feedback = "继续加油，多看几遍图片里的解释吧！💪";
-            
-            document.getElementById('feedback-text').innerText = feedback;
+            }
         }
     </script>
 </body>
