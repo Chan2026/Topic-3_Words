@@ -27,8 +27,15 @@
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-6 flex justify-between items-center h-16">
-            <h1 class="text-xl font-bold text-emerald-600">《棋王的心事》</h1>
-            <div class="flex space-x-4 h-full">
+            <div class="flex items-center space-x-3">
+                <!-- 回主页的小屋子按钮 -->
+                <a href="index.html" class="flex items-center text-gray-400 hover:text-emerald-600 transition-colors" title="回到首页">
+                    <span class="text-2xl">🏠</span>
+                </a>
+                <span class="text-gray-300">|</span>
+                <h1 class="text-lg font-bold text-emerald-600">单元二：棋王的心事</h1>
+            </div>
+            <div class="flex space-x-4 h-full text-sm sm:text-base">
                 <button onclick="showTab('lesson')" id="tab-lesson" class="tab-active px-2 h-full">课文解析</button>
                 <button onclick="showTab('words')" id="tab-words" class="text-gray-500 px-2 h-full">词语认识</button>
                 <button onclick="showTab('game')" id="tab-game" class="text-gray-500 px-2 h-full">连线游戏</button>
@@ -55,6 +62,7 @@
 
         <!-- 2. 词语认识 -->
         <section id="view-words" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- 词语卡片内容保持不变 -->
             <div class="bg-white p-4 rounded-lg shadow-sm text-center border hover:border-emerald-300">
                 <div class="text-xl font-bold text-emerald-600">滋味</div>
                 <div class="text-sm text-gray-500 italic">Rasa</div>
@@ -98,7 +106,6 @@
 
         <!-- 4. 日记范文 -->
         <section id="view-diary" class="hidden space-y-8">
-            <!-- 日记格式教学 -->
             <div class="bg-amber-50 border-2 border-dashed border-amber-200 p-6 rounded-xl">
                 <h3 class="text-lg font-bold text-amber-800 mb-4 flex items-center">
                     <span class="mr-2">📝</span> 日记格式要记牢：
@@ -119,7 +126,6 @@
                 </ul>
             </div>
 
-            <!-- 简洁范文展示 -->
             <div class="diary-paper p-8 sm:p-12 shadow-xl max-w-2xl mx-auto rounded-sm min-h-[350px]">
                 <div class="border-b-2 border-emerald-100 pb-2 mb-6 font-bold flex gap-4 text-gray-600">
                     <span>2024年5月10日</span>
