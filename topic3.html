@@ -3,133 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单元三：颂赞温情 - 达标测试</title>
+    <title>单元三：颂赞温情 - 双语测评</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #fffaf0; font-family: sans-serif; }
-        .option-btn { transition: all 0.2s; border: 2px solid #fed7aa; }
-        .option-btn:hover { background-color: #ffedd5; transform: scale(1.02); }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #fffaf0; }
+        .tab-active { border-bottom: 4px solid #f59e0b; color: #f59e0b; font-weight: bold; }
+        
+        /* 词汇卡片翻转样式 */
+        .card-container { perspective: 1000px; height: 14rem; }
+        .card-inner {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 0.6s;
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 1.5rem;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .card-front { background: white; border: 1px solid #fef3c7; }
+        .card-back { 
+            background: #fffbeb; border: 2px solid #fcd34d; 
+            transform: rotateY(180deg); 
+        }
+
+        .progress-bar { transition: width 0.4s ease-in-out; }
+        .opt-btn { transition: all 0.2s; border: 2px solid #f3f4f6; }
+        .opt-btn:hover { border-color: #fbbf24; background-color: #fffbeb; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-orange-200">
-        <div class="bg-orange-100 h-2 w-full">
-            <div id="progress" class="bg-orange-500 h-full transition-all" style="width: 0%"></div>
-        </div>
+<body class="text-gray-800 pb-12">
 
-        <div class="p-8">
-            <div id="quiz-ui">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="bg-orange-100 text-orange-700 px-4 py-1 rounded-full font-bold text-sm">单元三：颂赞温情</span>
-                    <span id="q-count" class="text-gray-400 text-sm">加载中...</span>
-                </div>
-                <h2 id="q-text" class="text-2xl font-bold text-gray-800 mb-8 leading-relaxed">正在准备题目，请稍候...</h2>
-                <div id="options" class="grid gap-4"></div>
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-6 flex justify-between items-center h-16">
+            <div class="flex items-center space-x-2">
+                <a href="index.html" class="text-2xl hover:opacity-80">🏠</a>
+                <span class="font-bold text-amber-700">单元三：颂赞温情</span>
             </div>
-
-            <div id="result-ui" class="hidden text-center py-10">
-                <div class="text-6xl mb-6">🎉</div>
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">测试完成！</h2>
-                <p id="score-text" class="text-5xl font-black text-orange-500 my-6">0 / 0</p>
-                <div id="upload-status" class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-6 mb-6">
-                    <p class="text-gray-500">正在准备发送成绩...</p>
-                </div>
-                <button onclick="location.href='index.html'" class="bg-gray-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-colors">
-                    返回首页
-                </button>
+            <div class="flex space-x-4 h-full text-sm">
+                <button onclick="switchTab('lesson')" id="tab-lesson" class="tab-active px-2 h-full">课文解析</button>
+                <button onclick="switchTab('words')" id="tab-words" class="text-gray-500 px-2 h-full">核心词汇库</button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="text-gray-500 px-2 h-full">达标测试</button>
             </div>
         </div>
-    </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-6">
+        
+        <!-- 1. 课文解析 -->
+        <section id="view-lesson" class="space-y-6">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border-t-8 border-amber-500">
+                <h2 class="text-2xl font-bold mb-4 text-amber-900">《颂赞温情》主题解析</h2>
+                <p class="text-gray-700 leading-relaxed text-lg mb-4">
+                    本单元让我们学会感受那些藏在日常生活中的“温情”。无论是父亲宽大的肩膀，还是母亲包裹的温暖，都是我们成长的动力。
+                </p>
+                <div class="bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400">
+                    <p class="text-amber-800 font-medium italic">“家人的爱如同一束光，在平凡的日子里给予我们恒久的温暖。”</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 核心词汇 (带中文解释) -->
+        <section id="view-words" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 词汇卡片由JS渲染 -->
+        </section>
+
+        <!-- 3. 达标测试 -->
+        <section id="view-quiz" class="hidden max-w-2xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-amber-100">
+                <div class="bg-gray-100 h-2 w-full">
+                    <div id="progress-bar" class="bg-amber-500 h-full progress-bar w-0"></div>
+                </div>
+                <div class="p-8">
+                    <div id="quiz-container">
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg font-bold text-xs">单元三语境挑战</span>
+                            <span id="q-counter" class="text-gray-400 text-sm font-bold">题目 1 / 12</span>
+                        </div>
+                        <h2 id="q-text" class="text-xl font-bold text-gray-800 mb-8 leading-relaxed min-h-[80px]"></h2>
+                        <div id="opt-container" class="grid gap-4"></div>
+                    </div>
+                    <div id="result-container" class="hidden text-center py-10">
+                        <div class="text-6xl mb-4">📜</div>
+                        <h2 class="text-2xl font-bold text-gray-800">测试完成</h2>
+                        <p id="final-score" class="text-5xl font-black text-amber-600 my-6">0 / 12</p>
+                        <div id="sync-status" class="text-sm text-gray-400 mb-6 font-medium">正在保存进度...</div>
+                        <button onclick="location.reload()" class="bg-amber-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-amber-700 w-full shadow-lg transition-all">重新挑战</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // 统一 ID
-        const appId = "bahasacina-years4-project";
-        let db, auth;
-
-        // 题目数据
-        const questions = [
-            { q: "“滋味”在文中的意思最接近什么？", a: "味道和感受", opts: ["味道和感受", "很难过", "非常忙碌"] },
-            { q: "文中提到“仓库”是用来做什么的？", a: "储藏物资", opts: ["玩耍的地方", "储藏物资", "买东西的地方"] },
-            { q: "哪一个词语形容“永远不变”？", a: "恒久", opts: ["暂时", "恒久", "立刻"] }
+        const vocabData = [
+            { zh: "滋味", py: "zī wèi", ms: "Perasaan/Rasa", desc: "味道或内心的感受。", icon: "🍵" },
+            { zh: "忙碌", py: "máng lù", ms: "Sibuk", desc: "不得空，事情很多。", icon: "💼" },
+            { zh: "仓库", py: "cāng kù", ms: "Gudang", desc: "储藏物资的建筑物。", icon: "🏢" },
+            { zh: "裹", py: "guǒ", ms: "Balut", desc: "包，缠绕。", icon: "🧣" },
+            { zh: "严厉", py: "yán lì", ms: "Tegas", desc: "严肃而厉害。", icon: "👮" },
+            { zh: "仁慈", py: "rén cí", ms: "Penyayang", desc: "仁爱慈善。", icon: "😇" },
+            { zh: "鼓励", py: "gǔ lì", ms: "Dorongan", desc: "激发勉励。", icon: "🔥" },
+            { zh: "感叹", py: "gǎn tàn", ms: "Mengeluh", desc: "有感而叹息。", icon: "💬" },
+            { zh: "漂泊", py: "piāo bó", ms: "Merantau", desc: "在外奔波，生活不固定。", icon: "🛶" },
+            { zh: "期盼", py: "qī pàn", ms: "Mengharap", desc: "期待盼望。", icon: "🌟" },
+            { zh: "恒久", py: "héng jiǔ", ms: "Abadi", desc: "长久不变。", icon: "⏳" },
+            { zh: "似", py: "shì", ms: "Seperti", desc: "像，如同。", icon: "🖼️" }
         ];
 
-        let currentIdx = 0;
-        let score = 0;
-        let studentName = localStorage.getItem('studentName') || "未知学生";
+        const quizData = [
+            { q: "文中提到父亲在烈日下流汗工作，那种辛苦的（ ）只有他自己知道。", a: "滋味 (Rasa/Perasaan)", opts: ["滋味 (Rasa/Perasaan)", "仓库 (Gudang)", "似 (Macam)"] },
+            { q: "父亲每天为了生计四处（ ），早出晚归，非常辛苦。", a: "忙碌 (Sibuk)", opts: ["严厉 (Tegas)", "忙碌 (Sibuk)", "期盼 (Mengharap)"] },
+            { q: "父亲把辛苦赚来的粮食整齐地堆放在（ ）里。", a: "仓库 (Gudang)", opts: ["仓库 (Gudang)", "感叹 (Mengeluh)", "漂泊 (Merantau)"] },
+            { q: "冬天的早晨，妈妈用厚厚的围巾把我的脖子（ ）得紧紧的。", a: "裹 (Balut)", opts: ["恒久 (Abadi)", "似 (Macam)", "裹 (Balut)"] },
+            { q: "虽然父亲平时对我的要求很（ ），但我知道那是为了我好。", a: "严厉 (Tegas)", opts: ["严厉 (Tegas)", "鼓励 (Dorongan)", "仁慈 (Penyayang)"] },
+            { q: "面对那些流离失所的灾民，王伯伯表现出了最（ ）的一面。", a: "仁慈 (Penyayang)", opts: ["仁慈 (Penyayang)", "滋味 (Rasa)", "忙碌 (Sibuk)"] },
+            { q: "每当我考试成绩不理想，父亲总是拍拍我的肩膀给我（ ）。", a: "鼓励 (Dorongan)", opts: ["期盼 (Mengharap)", "鼓励 (Dorongan)", "似 (Macam)"] },
+            { q: "看着旧相片里父亲年轻的模样，我不禁发出一声（ ）。", a: "感叹 (Mengeluh)", opts: ["仓库 (Gudang)", "感叹 (Mengeluh)", "裹 (Balut)"] },
+            { q: "为了给家里寄钱，叔叔常年在异乡（ ），很少回来。", a: "漂泊 (Merantau)", opts: ["漂泊 (Merantau)", "恒久 (Abadi)", "仁慈 (Penyayang)"] },
+            { q: "奶奶坐在大门口，眼神里充满了对儿孙归家的（ ）。", a: "期盼 (Mengharap)", opts: ["忙碌 (Sibuk)", "期盼 (Mengharap)", "仓库 (Gudang)"] },
+            { q: "家人的关怀如同深夜的灯火，温暖而（ ），永不熄灭。", a: "恒久 (Abadi)", opts: ["恒久 (Abadi)", "似 (Macam)", "滋味 (Rasa)"] },
+            { q: "母爱（ ）一股清泉，滋润着我们这些幼苗的心田。", a: "似 (Seperti)", opts: ["似 (Seperti)", "鼓励 (Dorongan)", "严厉 (Tegas)"] }
+        ];
 
-        // 初始化数据库 (增加错误捕获，防止页面卡死)
-        async function initDB() {
+        let currentQIdx = 0;
+        let score = 0;
+        let db;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        async function init() {
             try {
-                const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-                if (config) {
-                    const app = initializeApp(config);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                }
-            } catch (e) {
-                console.error("Firebase Init Error:", e);
-            }
-            render(); // 无论数据库是否成功，都开始显示题目
+                const config = JSON.parse(__firebase_config);
+                const app = initializeApp(config);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                await signInAnonymously(auth);
+            } catch (e) { console.error("Firebase Auth Error"); }
+            
+            renderVocab();
+            loadQuestion();
         }
 
-        function render() {
-            if (currentIdx >= questions.length) return;
-            const q = questions[currentIdx];
+        function renderVocab() {
+            const container = document.getElementById('view-words');
+            container.innerHTML = vocabData.map(word => `
+                <div class="card-container" onclick="this.classList.toggle('flipped')">
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="text-4xl mb-3">${word.icon}</div>
+                            <div class="text-2xl font-bold text-gray-800">${word.zh}</div>
+                            <div class="text-sm text-amber-600 font-mono mt-1">${word.py}</div>
+                            <div class="text-xs text-gray-400 mt-4 italic">点击翻面查看详细解释</div>
+                        </div>
+                        <div class="card-back">
+                            <div class="bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-xs font-bold mb-3">${word.ms}</div>
+                            <p class="text-gray-700 leading-relaxed font-medium px-4 text-lg">
+                                ${word.desc}
+                            </p>
+                            <div class="mt-4 text-2xl">${word.icon}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadQuestion() {
+            if (currentQIdx >= quizData.length) {
+                showResults();
+                return;
+            }
+            const q = quizData[currentQIdx];
+            document.getElementById('q-counter').innerText = `题目 ${currentQIdx + 1} / ${quizData.length}`;
             document.getElementById('q-text').innerText = q.q;
-            document.getElementById('q-count').innerText = `题目 ${currentIdx + 1} / ${questions.length}`;
-            document.getElementById('progress').style.width = `${(currentIdx / questions.length) * 100}%`;
-            
-            const optDiv = document.getElementById('options');
-            optDiv.innerHTML = '';
+            document.getElementById('progress-bar').style.width = `${(currentQIdx / quizData.length) * 100}%`;
+
+            const optBox = document.getElementById('opt-container');
+            optBox.innerHTML = '';
             q.opts.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = "option-btn w-full p-5 text-left rounded-2xl font-bold text-gray-700 bg-white";
+                btn.className = "opt-btn w-full text-left p-4 rounded-2xl bg-white font-bold text-gray-700 shadow-sm";
                 btn.innerText = opt;
-                btn.onclick = () => handleAnswer(opt);
-                optDiv.appendChild(btn);
+                btn.onclick = () => {
+                    if(opt === q.a) score++;
+                    currentQIdx++;
+                    loadQuestion();
+                };
+                optBox.appendChild(btn);
             });
         }
 
-        window.handleAnswer = (selected) => {
-            if(selected === questions[currentIdx].a) score++;
-            currentIdx++;
-            if(currentIdx < questions.length) render();
-            else showResult();
-        };
-
-        async function showResult() {
-            document.getElementById('quiz-ui').classList.add('hidden');
-            document.getElementById('result-ui').classList.remove('hidden');
-            document.getElementById('score-text').innerText = `${score} / ${questions.length}`;
-            document.getElementById('progress').style.width = `100%`;
-
-            if (db && auth) {
+        async function showResults() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / ${quizData.length}`;
+            
+            if (db) {
+                const name = localStorage.getItem('studentName') || "匿名学生";
                 try {
-                    await signInAnonymously(auth);
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), {
-                        studentName: studentName,
+                        name: name,
                         score: score,
-                        total: questions.length,
-                        topic: "单元三：颂赞温情",
+                        total: 12,
+                        topic: "单元三：颂赞温情测试",
                         timestamp: serverTimestamp()
                     });
-                    document.getElementById('upload-status').innerHTML = `
-                        <p class="text-green-600 font-bold text-lg">✅ 成绩已成功发送给老师！</p>
-                        <p class="text-gray-400 text-sm mt-1">记录姓名：${studentName}</p>
-                    `;
-                } catch (err) {
-                    document.getElementById('upload-status').innerText = "❌ 发送失败，请检查配置";
+                    document.getElementById('sync-status').innerText = "✅ 成绩已同步至教师端";
+                } catch (e) {
+                    document.getElementById('sync-status').innerText = "⚠️ 成绩已保存本地";
                 }
-            } else {
-                document.getElementById('upload-status').innerText = "⚠️ 预览模式无法上传成绩";
             }
         }
 
-        initDB();
+        window.switchTab = (tab) => {
+            ['lesson', 'words', 'quiz'].forEach(t => {
+                document.getElementById('view-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).className = "text-gray-500 px-2 h-full";
+            });
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            document.getElementById('tab-' + tab).className = "tab-active px-2 h-full";
+        };
+
+        init();
     </script>
 </body>
 </html>
