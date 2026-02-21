@@ -13,37 +13,27 @@
 </head>
 <body class="p-4 md:p-8">
     <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-orange-200">
-        <!-- 进度条 -->
         <div class="bg-orange-100 h-2 w-full">
             <div id="progress" class="bg-orange-500 h-full transition-all" style="width: 0%"></div>
         </div>
 
         <div class="p-8">
-            <!-- 做题界面 -->
             <div id="quiz-ui">
                 <div class="flex justify-between items-center mb-6">
                     <span class="bg-orange-100 text-orange-700 px-4 py-1 rounded-full font-bold text-sm">单元三：颂赞温情</span>
-                    <span id="q-count" class="text-gray-400 text-sm">题目 1 / 3</span>
+                    <span id="q-count" class="text-gray-400 text-sm">加载中...</span>
                 </div>
-                
-                <h2 id="q-text" class="text-2xl font-bold text-gray-800 mb-8 leading-relaxed">正在准备题目...</h2>
-                
-                <div id="options" class="grid gap-4">
-                    <!-- 选项会自动显示在这里 -->
-                </div>
+                <h2 id="q-text" class="text-2xl font-bold text-gray-800 mb-8 leading-relaxed">正在准备题目，请稍候...</h2>
+                <div id="options" class="grid gap-4"></div>
             </div>
 
-            <!-- 结果界面 -->
             <div id="result-ui" class="hidden text-center py-10">
                 <div class="text-6xl mb-6">🎉</div>
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">测试完成！</h2>
                 <p id="score-text" class="text-5xl font-black text-orange-500 my-6">0 / 0</p>
-                
-                <!-- 状态提示框 -->
                 <div id="upload-status" class="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-6 mb-6">
-                    <p class="text-gray-500 animate-pulse">正在将成绩发送给老师...</p>
+                    <p class="text-gray-500">正在准备发送成绩...</p>
                 </div>
-
                 <button onclick="location.href='index.html'" class="bg-gray-800 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-colors">
                     返回首页
                 </button>
@@ -56,14 +46,11 @@
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // 1. 数据库配置
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = "bahasacina-years4-project"; // 身份证必须统一
+        // 统一 ID
+        const appId = "bahasacina-years4-project";
+        let db, auth;
 
-        // 2. 题目数据
+        // 题目数据
         const questions = [
             { q: "“滋味”在文中的意思最接近什么？", a: "味道和感受", opts: ["味道和感受", "很难过", "非常忙碌"] },
             { q: "文中提到“仓库”是用来做什么的？", a: "储藏物资", opts: ["玩耍的地方", "储藏物资", "买东西的地方"] },
@@ -74,12 +61,27 @@
         let score = 0;
         let studentName = localStorage.getItem('studentName') || "未知学生";
 
-        // 3. 渲染题目
+        // 初始化数据库 (增加错误捕获，防止页面卡死)
+        async function initDB() {
+            try {
+                const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+                if (config) {
+                    const app = initializeApp(config);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                }
+            } catch (e) {
+                console.error("Firebase Init Error:", e);
+            }
+            render(); // 无论数据库是否成功，都开始显示题目
+        }
+
         function render() {
+            if (currentIdx >= questions.length) return;
             const q = questions[currentIdx];
             document.getElementById('q-text').innerText = q.q;
             document.getElementById('q-count').innerText = `题目 ${currentIdx + 1} / ${questions.length}`;
-            document.getElementById('progress').style.width = `${((currentIdx) / questions.length) * 100}%`;
+            document.getElementById('progress').style.width = `${(currentIdx / questions.length) * 100}%`;
             
             const optDiv = document.getElementById('options');
             optDiv.innerHTML = '';
@@ -92,51 +94,42 @@
             });
         }
 
-        // 4. 处理答案
-        function handleAnswer(selected) {
+        window.handleAnswer = (selected) => {
             if(selected === questions[currentIdx].a) score++;
             currentIdx++;
-            
-            if(currentIdx < questions.length) {
-                render();
-            } else {
-                showResult();
-            }
-        }
+            if(currentIdx < questions.length) render();
+            else showResult();
+        };
 
-        // 5. 显示结果并上传
         async function showResult() {
             document.getElementById('quiz-ui').classList.add('hidden');
             document.getElementById('result-ui').classList.remove('hidden');
             document.getElementById('score-text').innerText = `${score} / ${questions.length}`;
             document.getElementById('progress').style.width = `100%`;
 
-            try {
-                // 匿名登录并上传
-                await signInAnonymously(auth);
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), {
-                    studentName: studentName,
-                    score: score,
-                    total: questions.length,
-                    topic: "单元三：颂赞温情",
-                    timestamp: serverTimestamp()
-                });
-                
-                document.getElementById('upload-status').innerHTML = `
-                    <p class="text-green-600 font-bold text-lg">✅ 成绩已成功发送给老师！</p>
-                    <p class="text-gray-400 text-sm mt-1">记录姓名：${studentName}</p>
-                `;
-                document.getElementById('upload-status').className = "bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6";
-            } catch (err) {
-                document.getElementById('upload-status').innerHTML = `
-                    <p class="text-red-600 font-bold">❌ 发送失败</p>
-                    <p class="text-gray-400 text-sm">请检查网络或联系老师</p>
-                `;
+            if (db && auth) {
+                try {
+                    await signInAnonymously(auth);
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), {
+                        studentName: studentName,
+                        score: score,
+                        total: questions.length,
+                        topic: "单元三：颂赞温情",
+                        timestamp: serverTimestamp()
+                    });
+                    document.getElementById('upload-status').innerHTML = `
+                        <p class="text-green-600 font-bold text-lg">✅ 成绩已成功发送给老师！</p>
+                        <p class="text-gray-400 text-sm mt-1">记录姓名：${studentName}</p>
+                    `;
+                } catch (err) {
+                    document.getElementById('upload-status').innerText = "❌ 发送失败，请检查配置";
+                }
+            } else {
+                document.getElementById('upload-status').innerText = "⚠️ 预览模式无法上传成绩";
             }
         }
 
-        // 启动
-        render();
+        initDB();
     </script>
 </body>
 </html>
