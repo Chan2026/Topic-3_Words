@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词语练习小测验</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #fdf2f8; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        .quiz-card { background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: none; }
+        .quiz-card.active { display: block; animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .option-btn { width: 100%; text-align: left; padding: 15px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 12px; transition: all 0.2s; font-size: 1.1rem; }
+        .option-btn:hover { border-color: #ec4899; background-color: #fdf2f8; }
+        .correct { background-color: #d1fae5 !important; border-color: #10b981 !important; color: #065f46; }
+        .incorrect { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-2xl mx-auto">
+        <div id="welcome-screen" class="text-center py-20 bg-white rounded-3xl shadow-lg px-6">
+            <h1 class="text-4xl font-bold text-pink-600 mb-6">词语练习小测验 📝</h1>
+            <p class="text-gray-600 mb-8 text-xl">准备好测试你的学习成果了吗？一共 10 道题。</p>
+            <button onclick="startQuiz()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 px-10 rounded-full text-xl shadow-lg transition-transform hover:scale-105">开始挑战</button>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <div id="result-screen" class="hidden text-center py-20 bg-white rounded-3xl shadow-lg px-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">测试完成！</h2>
+            <div class="text-6xl font-bold text-pink-500 mb-6" id="final-score">0 / 10</div>
+            <p class="text-xl text-gray-600 mb-8" id="feedback-text"></p>
+            <button onclick="location.reload()" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-full">重新开始</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { q: "“疑难杂症”这个词通常用来比喻什么？", options: ["很容易就能处理的小事情", "棘手或难以解决的问题", "非常罕见的各种艺术作品", "大家都很喜欢的体育运动"], correct: 1 },
+            { q: "“下棋的技艺”可以用哪一个词来概括？", options: ["协调", "挨", "棋艺", "拒绝"], correct: 2 },
+            { q: "如果你想表达某件事物看起来“好像、似乎”是某种样子，你会用哪个词？", options: ["距离", "仿佛", "输", "孤零零"], correct: 1 },
+            { q: "“配合得适当”是指以下哪个词？", options: ["协调", "勾肩搭背", "拒绝", "棋艺"], correct: 0 },
+            { q: "在比赛中没有获得胜利，也就是“失败”了，可以用哪个字表示？", options: ["挨", "赢", "输", "走"], correct: 2 },
+            { q: "当别人送你礼物但你“不接受”时，你是在做什么？", options: ["距离", "拒绝", "协调", "仿佛"], correct: 1 },
+            { q: "“两者相隔的空间”或者“差距”被称为什么？", options: ["距离", "疑难杂症", "挨", "棋艺"], correct: 0 },
+            { q: "形容一个人“孤单，无依无靠”，没有人在身边陪衬，用哪个词最贴切？", options: ["勾肩搭背", "协调", "仿佛", "孤零零"], correct: 3 },
+            { q: "“挨”在图片中的解释是什么？", options: ["被打了一顿", "靠近；紧接着", "离开很远", "一种食物的名称"], correct: 1 },
+            { q: "“勾肩搭背”通常用来形容什么样的关系？", options: ["互不相识的陌生人", "水火不容的敌人", "关系亲密密切的朋友", "上下级的领导关系"], correct: 2 }
+        ];
+
+        let currentStep = 0;
+        let score = 0;
+
+        function startQuiz() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            const data = quizData[currentStep];
+            
+            let optionsHtml = '';
+            data.options.forEach((opt, index) => {
+                optionsHtml += `<button onclick="checkAnswer(${index})" class="option-btn" id="opt-${index}">${opt}</button>`;
+            });
+
+            container.innerHTML = `
+                <div class="quiz-card active p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-pink-500 font-bold">第 ${currentStep + 1} / 10 题</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">${data.q}</h2>
+                    <div class="space-y-2">${optionsHtml}</div>
+                </div>
+            `;
+        }
+
+        function checkAnswer(index) {
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(btn => btn.disabled = true);
+
+            if (index === quizData[currentStep].correct) {
+                document.getElementById(`opt-${index}`).classList.add('correct');
+                score++;
+            } else {
+                document.getElementById(`opt-${index}`).classList.add('incorrect');
+                document.getElementById(`opt-${quizData[currentStep].correct}`).classList.add('correct');
+            }
+
+            setTimeout(() => {
+                currentStep++;
+                if (currentStep < quizData.length) {
+                    renderQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1500);
+        }
+
+        function showResult() {
+            document.getElementById('quiz-container').innerHTML = '';
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score} / 10`;
+            
+            let feedback = "";
+            if(score === 10) feedback = "完美！你已经完全掌握了这些词语！🏆";
+            else if(score >= 7) feedback = "很棒！大部分词语你都记住了！🌟";
+            else feedback = "继续加油，多看几遍图片里的解释吧！💪";
+            
+            document.getElementById('feedback-text').innerText = feedback;
+        }
+    </script>
+</body>
+</html>
