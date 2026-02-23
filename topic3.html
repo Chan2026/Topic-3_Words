@@ -1,323 +1,326 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Heart, Book, Star, ChevronRight, 
-  Trophy, Home, BookOpen, 
-  ArrowLeft, RotateCcw, LayoutDashboard,
-  Clock, Baby, User, Users
-} from 'lucide-react';
-
-const App = () => {
-  const [activeTab, setActiveTab] = useState('home'); // home, lesson, words, quiz, teacher
-  const [flippedCard, setFlippedCard] = useState(null);
-  const [quizIndex, setQuizIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-  const [records, setRecords] = useState([]);
-
-  // 1. 生词数据 (使用 Emoji 替代图片)
-  const vocabulary = [
-    { word: "裹", pinyin: "guǒ", meaning: "包扎；缠绕", malay: "Membalut / Membungkus", example: "妈妈用厚厚的毯子把婴儿裹得严严实实的。", emoji: "🎁" },
-    { word: "严厉", pinyin: "yán lì", meaning: "严肃而厉害", malay: "Tegas / Garang", example: "爸爸严厉地批评了我，因为我撒了谎。", emoji: "😠" },
-    { word: "忙碌", pinyin: "máng lù", meaning: "不得空闲", malay: "Sibuk", example: "爸爸每天忙碌地工作，为了撑起这个家。", emoji: "🐝" },
-    { word: "鼓励", pinyin: "gǔ lì", meaning: "激发并勉励", malay: "Memberi galakan", example: "老师的鼓励让我重新找回了自信。", emoji: "👏" },
-    { word: "漂泊", pinyin: "piāo bó", meaning: "流落在外，居无定所", malay: "Merantau", example: "他为了生活，已经在异乡漂泊了十年。", emoji: "⛵" },
-    { word: "支撑", pinyin: "zhī chēng", meaning: "承受压力；顶住", malay: "Menyokong", example: "家人的关怀是支撑我走下去的动力。", emoji: "🏗️" },
-    { word: "温馨", pinyin: "wēn xīn", meaning: "温暖甜美", malay: "Mesra / Harmoni", example: "月光下，一家人吃着温馨的晚餐。", emoji: "🕯️" },
-    { word: "牵挂", pinyin: "qiān guà", meaning: "挂念，放心不下", malay: "Bimbang / Rindu", example: "妈妈时刻牵挂着独自在校宿营的我。", emoji: "🎈" },
-    { word: "慈爱", pinyin: "cí ài", meaning: "长辈对晚辈的爱", malay: "Kasih sayang", example: "外婆用慈爱的目光看着我吃苹果。", emoji: "👵" },
-    { word: "抱怨", pinyin: "bào yuàn", meaning: "心中不满，埋怨", malay: "Merungut", example: "遇到困难我们要想办法解决，而不是抱怨。", emoji: "😒" },
-    { word: "颤抖", pinyin: "chàn dǒu", meaning: "身体发抖", malay: "Menggigil", example: "弟弟因为害怕，声音都在颤抖。", emoji: "🥶" },
-    { word: "嘱咐", pinyin: "zhǔ fù", meaning: "再三叮嘱", malay: "Berpesan", example: "出门前，奶奶反复嘱咐我过马路要小心。", emoji: "🗣️" }
-  ];
-
-  // 2. 修正后的课文内容
-  const lessons = {
-    l1: {
-      title: "第一篇：月光下的晚餐",
-      summary: [
-        "氛围：晚风轻拂，月光洒在餐桌上，营造出宁静的感觉。",
-        "情感：晚餐虽然只是家常便饭，但一家人团聚（Berkumpul）的快乐胜过一切。",
-        "感悟：作者体会到家人的爱就像月光，温柔地照亮了生活，充满了幸福感（Bahagia）。"
-      ]
-    },
-    l2: {
-      title: "第二篇：一世情",
-      summary: [
-        "童年时期：父母像大树，张开双臂为我们遮风挡雨，那是最纯粹的呵护（Jagaan）。",
-        "少年时期：我们开始叛逆、想飞，父母的眼神里多了牵挂（Kebimbangan）与严厉的叮咛。",
-        "成年时期：我们远走高飞去漂泊（Merantau），父母在家中守望，亲情成了永远的支撑（Sokongan）。",
-        "晚年时期：角色对调，我们搀扶着年迈的父母，这一世的缘分，是循环不断的爱（Kasih sayang）。"
-      ]
-    }
-  };
-
-  const quizQuestions = [
-    { q: "‘裹’(guǒ) 这个动作通常用在：", a: ["包裹礼物或身体", "切开水果", "写字"], c: 0 },
-    { q: "‘一世情’中，童年时期的父母像：", a: ["小草", "遮风挡雨的大树", "流星"], c: 1 },
-    { q: "‘颤抖’(Menggigil) 可能是因为：", a: ["天气太热", "害怕或严寒", "很开心"], c: 1 },
-    { q: "哪一个词代表‘长辈对晚辈的爱’？", a: ["抱怨", "慈爱(Kasih sayang)", "忙碌"], c: 1 },
-    { q: "‘漂泊’(Merantau) 说明一个人：", a: ["在家里休息", "远离家乡去生活", "在公园散步"], c: 1 },
-    { q: "当父母老了，我们在‘一世情’中应扮演什么角色？", a: ["继续抱怨", "搀扶与报答(Membalas jasa)", "不理不睬"], c: 1 },
-    { q: "‘温馨’(Mesra) 的晚餐通常是指：", a: ["很多贵菜的晚餐", "充满亲情和笑声的晚餐", "一个人吃的晚餐"], c: 1 },
-    { q: "‘支撑’(Sokongan) 一个家的往往是：", a: ["父母的努力与爱", "漂亮的家具", "电视机"], c: 0 },
-    { q: "‘嘱咐’(Berpesan) 的近义词是：", a: ["打骂", "叮嘱", "忘记"], c: 1 },
-    { q: "课文‘一世情’的主旨是：", a: ["要努力工作赚钱", "珍惜这一世不断的亲情", "要多去旅游"], c: 1 }
-  ];
-
-  const handleAnswer = (idx) => {
-    const isCorrect = idx === quizQuestions[quizIndex].c;
-    if (isCorrect) setScore(prev => prev + 1);
-    
-    if (quizIndex < quizQuestions.length - 1) {
-      setQuizIndex(prev => prev + 1);
-    } else {
-      const finalScore = isCorrect ? score + 1 : score;
-      const newRecord = {
-        date: new Date().toLocaleString(),
-        score: finalScore,
-        total: quizQuestions.length
-      };
-      setRecords(prev => [newRecord, ...prev]);
-      setShowResult(true);
-    }
-  };
-
-  const resetQuiz = () => {
-    setQuizIndex(0);
-    setScore(0);
-    setShowResult(false);
-  };
-
-  return (
-    <div className="min-h-screen bg-[#FDFCF0] text-[#4A3728] pb-10">
-      {/* 顶部导航 */}
-      <nav className="bg-white px-4 py-3 flex justify-between items-center shadow-sm sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <Heart className="text-red-500 fill-red-500" size={24} />
-          <h1 className="text-lg font-bold">华文单元三：颂赞温情</h1>
-        </div>
-        <div className="flex gap-2">
-          {activeTab !== 'home' && (
-            <button onClick={() => setActiveTab('home')} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><Home size={20}/></button>
-          )}
-          <button onClick={() => setActiveTab('teacher')} className="bg-blue-100 p-2 rounded-full text-blue-600 hover:bg-blue-200"><LayoutDashboard size={20}/></button>
-        </div>
-      </nav>
-
-      <main className="max-w-xl mx-auto p-4">
-        {/* 首页 (Index) */}
-        {activeTab === 'home' && (
-          <div className="space-y-6 pt-4 animate-in fade-in zoom-in-95">
-            <div className="bg-orange-400 rounded-3xl p-8 text-white shadow-lg text-center">
-              <h2 className="text-2xl font-black mb-2">准备好学习了吗？🎒</h2>
-              <p className="opacity-90 text-sm">点击下方按钮开始探索课文</p>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4">
-              <button onClick={() => setActiveTab('lesson')} className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-4 border-l-8 border-blue-400 hover:scale-[1.02] transition-all">
-                <div className="bg-blue-100 p-3 rounded-xl text-blue-500"><BookOpen /></div>
-                <div className="text-left">
-                  <h4 className="font-bold text-lg text-blue-800">课文研究 (Isi Pelajaran)</h4>
-                  <p className="text-xs text-gray-500">深入了解《月光下的晚餐》与《一世情》</p>
-                </div>
-              </button>
-              
-              <button onClick={() => setActiveTab('words')} className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-4 border-l-8 border-orange-400 hover:scale-[1.02] transition-all">
-                <div className="bg-orange-100 p-3 rounded-xl text-orange-500"><Star /></div>
-                <div className="text-left">
-                  <h4 className="font-bold text-lg text-orange-800">生词闪卡 (Flashcards)</h4>
-                  <p className="text-xs text-gray-500">用 Emoji 快速记忆词义与造句</p>
-                </div>
-              </button>
-              
-              <button onClick={() => setActiveTab('quiz')} className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-4 border-l-8 border-green-400 hover:scale-[1.02] transition-all">
-                <div className="bg-green-100 p-3 rounded-xl text-green-500"><Trophy /></div>
-                <div className="text-left">
-                  <h4 className="font-bold text-lg text-green-800">闯关练习 (Latihan)</h4>
-                  <p className="text-xs text-gray-500">回答10道题，自动记录成绩</p>
-                </div>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 课文研究 */}
-        {activeTab === 'lesson' && (
-          <div className="space-y-6 pt-4 animate-in slide-in-from-right">
-            <div className="flex items-center gap-2 mb-2">
-              <button onClick={() => setActiveTab('home')} className="p-2"><ArrowLeft size={20}/></button>
-              <h3 className="text-xl font-bold">课文核心内容</h3>
-            </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-blue-100 space-y-8">
-               <section>
-                 <div className="flex items-center gap-2 text-blue-600 mb-3">
-                   <Clock size={20}/>
-                   <h4 className="font-black text-lg underline decoration-blue-200 decoration-4 underline-offset-4">{lessons.l1.title}</h4>
-                 </div>
-                 <div className="space-y-3">
-                   {lessons.l1.summary.map((s, i) => (
-                     <div key={i} className="flex gap-2 text-sm leading-relaxed bg-blue-50/50 p-3 rounded-lg border-l-2 border-blue-200">
-                       <span className="text-blue-400">✦</span> {s}
-                     </div>
-                   ))}
-                 </div>
-               </section>
-
-               <section>
-                 <div className="flex items-center gap-2 text-rose-600 mb-3">
-                   <Users size={20}/>
-                   <h4 className="font-black text-lg underline decoration-rose-200 decoration-4 underline-offset-4">{lessons.l2.title}</h4>
-                 </div>
-                 <div className="space-y-3">
-                   {lessons.l2.summary.map((s, i) => (
-                     <div key={i} className="flex gap-2 text-sm leading-relaxed bg-rose-50/50 p-3 rounded-lg border-l-2 border-rose-200">
-                       <span className="text-rose-400">♥</span> {s}
-                     </div>
-                   ))}
-                 </div>
-               </section>
-            </div>
-            <button onClick={() => setActiveTab('home')} className="w-full bg-[#4A3728] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg">
-              <Home size={18}/> 返回主页
-            </button>
-          </div>
-        )}
-
-        {/* 生词闪卡 */}
-        {activeTab === 'words' && (
-          <div className="space-y-4 pt-4 animate-in fade-in">
-            <div className="flex justify-between items-center">
-               <h3 className="text-xl font-bold flex items-center gap-2">
-                 <button onClick={() => setActiveTab('home')}><ArrowLeft size={20}/></button>
-                 生词闪卡
-               </h3>
-               <span className="text-[10px] bg-orange-100 text-orange-600 px-2 py-1 rounded-full uppercase tracking-wider font-bold">Click to Flip</span>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {vocabulary.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className="h-64 cursor-pointer perspective-1000"
-                  onClick={() => setFlippedCard(flippedCard === idx ? null : idx)}
-                >
-                  <div className={`relative w-full h-full transition-all duration-500 transform-style-3d ${flippedCard === idx ? 'rotate-y-180' : ''}`}>
-                    {/* Front */}
-                    <div className="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-md border-b-4 border-orange-100 flex flex-col items-center justify-center p-6 text-center">
-                       <span className="text-6xl mb-4">{item.emoji}</span>
-                       <h4 className="text-3xl font-black text-orange-600">{item.word}</h4>
-                       <p className="text-gray-400 font-medium tracking-widest">{item.pinyin}</p>
-                    </div>
-                    {/* Back */}
-                    <div className="absolute inset-0 backface-hidden bg-orange-500 rounded-3xl shadow-md p-6 text-white rotate-y-180 flex flex-col justify-center">
-                       <div className="border-b border-white/30 pb-2 mb-3">
-                         <h5 className="font-bold text-xl">{item.word} <span className="text-sm font-normal">({item.pinyin})</span></h5>
-                         <p className="text-orange-100 font-bold">{item.malay}</p>
-                       </div>
-                       <div className="space-y-3 text-sm">
-                         <p><span className="opacity-70">解释:</span> {item.meaning}</p>
-                         <div className="bg-black/10 p-3 rounded-xl italic leading-relaxed text-xs border-l-2 border-white/50">
-                           “{item.example}”
-                         </div>
-                       </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setActiveTab('home')} className="w-full bg-[#4A3728] text-white py-4 rounded-2xl font-bold mt-4 shadow-lg">
-               返回首页
-            </button>
-          </div>
-        )}
-
-        {/* 练习闯关 */}
-        {activeTab === 'quiz' && (
-          <div className="pt-4 animate-in zoom-in-95">
-            {!showResult ? (
-              <div className="bg-white rounded-3xl shadow-xl border-t-8 border-green-500">
-                <div className="p-4 flex justify-between items-center border-b border-gray-100">
-                   <span className="text-sm font-bold text-green-600">进度: {quizIndex + 1} / {quizQuestions.length}</span>
-                   <span className="text-sm font-bold text-gray-400">正确: {score}</span>
-                </div>
-                <div className="p-8">
-                  <h3 className="text-lg font-bold mb-8 leading-relaxed min-h-[60px]">{quizQuestions[quizIndex].q}</h3>
-                  <div className="space-y-4">
-                    {quizQuestions[quizIndex].a.map((opt, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleAnswer(i)}
-                        className="w-full text-left p-4 rounded-2xl border-2 border-gray-50 hover:border-green-400 hover:bg-green-50 transition-all font-bold flex justify-between items-center group active:scale-[0.98]"
-                      >
-                        {opt}
-                        <ChevronRight className="text-gray-200 group-hover:text-green-400" size={18} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white p-10 rounded-3xl text-center shadow-2xl animate-in fade-in slide-in-from-bottom-4">
-                <Trophy className="mx-auto text-yellow-500 mb-4 drop-shadow-lg" size={80} />
-                <h2 className="text-2xl font-black">测试完成！🎉</h2>
-                <div className="text-6xl font-black text-green-600 my-6">{score} <span className="text-2xl text-gray-300">/ {quizQuestions.length}</span></div>
-                <p className="text-gray-500 mb-8">成绩已自动保存到老师后台。</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <button onClick={resetQuiz} className="bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-                    <RotateCcw size={18}/> 重考
-                  </button>
-                  <button onClick={() => setActiveTab('home')} className="bg-green-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-green-200">
-                    返回首页
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 老师后台 (Teacher View) */}
-        {activeTab === 'teacher' && (
-          <div className="space-y-6 pt-4 animate-in fade-in">
-             <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold flex items-center gap-2 text-blue-800">
-                  <LayoutDashboard size={22}/> 成绩记录中心
-                </h3>
-                <button onClick={() => setActiveTab('home')} className="text-sm bg-gray-100 px-3 py-1 rounded-full font-bold">返回</button>
-             </div>
-
-             {records.length === 0 ? (
-               <div className="bg-white p-12 rounded-3xl text-center border-2 border-dashed border-gray-200">
-                 <p className="text-gray-400">暂无考试记录。学生完成练习后成绩会显示在这里。</p>
-               </div>
-             ) : (
-               <div className="space-y-3">
-                 {records.map((r, i) => (
-                   <div key={i} className="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center border-l-4 border-green-500">
-                     <div>
-                       <p className="text-xs text-gray-400">{r.date}</p>
-                       <p className="font-bold text-gray-700">学生测试记录 #{records.length - i}</p>
-                     </div>
-                     <div className="text-right">
-                       <p className="text-xl font-black text-green-600">{r.score} <small className="text-xs text-gray-300">/ {r.total}</small></p>
-                       <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded font-bold uppercase">Stored</span>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             )}
-          </div>
-        )}
-      </main>
-
-      <style dangerouslySetInnerHTML={{ __html: `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华文单元三：颂赞温情</title>
+    <!-- 引入 React 和 Tailwind CSS -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 图标库 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
-      `}} />
-    </div>
-  );
-};
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFCF0]">
+    <div id="root"></div>
 
-export default App;
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 模拟 Lucide 图标组件
+        const Icon = ({ name, size = 24, className = "" }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('home'); // home, lesson, words, quiz, teacher
+            const [flippedCard, setFlippedCard] = useState(null);
+            const [quizIndex, setQuizIndex] = useState(0);
+            const [score, setScore] = useState(0);
+            const [showResult, setShowResult] = useState(false);
+            const [records, setRecords] = useState([]);
+
+            // 数据定义
+            const vocabulary = [
+                { word: "裹", pinyin: "guǒ", meaning: "包扎；缠绕", malay: "Membalut / Membungkus", example: "妈妈用厚厚的毯子把婴儿裹得严严实实的。", emoji: "🎁" },
+                { word: "严厉", pinyin: "yán lì", meaning: "严肃而厉害", malay: "Tegas / Garang", example: "爸爸严厉地批评了我，因为我撒了谎。", emoji: "😠" },
+                { word: "忙碌", pinyin: "máng lù", meaning: "不得空闲", malay: "Sibuk", example: "爸爸每天忙碌地工作，为了撑起这个家。", emoji: "🐝" },
+                { word: "鼓励", pinyin: "gǔ lì", meaning: "激发并勉励", malay: "Memberi galakan", example: "老师的鼓励让我重新找回了自信。", emoji: "👏" },
+                { word: "漂泊", pinyin: "piāo bó", meaning: "流落在外，居无定所", malay: "Merantau", example: "他为了生活，已经在异乡漂泊了十年。", emoji: "⛵" },
+                { word: "支撑", pinyin: "zhī chēng", meaning: "承受压力；顶住", malay: "Menyokong", example: "家人的关怀是支撑我走下去的动力。", emoji: "🏗️" },
+                { word: "温馨", pinyin: "wēn xīn", meaning: "温暖甜美", malay: "Mesra / Harmoni", example: "月光下，一家人吃着温馨的晚餐。", emoji: "🕯️" },
+                { word: "牵挂", pinyin: "qiān guà", meaning: "挂念，放心不下", malay: "Bimbang / Rindu", example: "妈妈时刻牵挂着独自在校宿营的我。", emoji: "🎈" },
+                { word: "慈爱", pinyin: "cí ài", meaning: "长辈对晚辈的爱", malay: "Kasih sayang", example: "外婆用慈爱的目光看着我吃苹果。", emoji: "👵" },
+                { word: "抱怨", pinyin: "bào yuàn", meaning: "心中不满，埋怨", malay: "Merungut", example: "遇到困难我们要想办法解决，而不是抱怨。", emoji: "😒" },
+                { word: "颤抖", pinyin: "chàn dǒu", meaning: "身体发抖", malay: "Menggigil", example: "弟弟因为害怕，声音都在颤抖。", emoji: "🥶" },
+                { word: "嘱咐", pinyin: "zhǔ fù", meaning: "再三叮嘱", malay: "Berpesan", example: "出门前，奶奶反复嘱咐我过马路要小心。", emoji: "🗣️" }
+            ];
+
+            const lessons = {
+                l1: {
+                    title: "第一篇：月光下的晚餐",
+                    summary: [
+                        "氛围：晚风轻拂，月光洒在餐桌上，营造出宁静的感觉。",
+                        "情感：晚餐虽然只是家常便饭，但一家人团聚（Berkumpul）的快乐胜过一切。",
+                        "感悟：作者体会到家人的爱就像月光，温柔地照亮了生活，充满了幸福感（Bahagia）。"
+                    ]
+                },
+                l2: {
+                    title: "第二篇：一世情",
+                    summary: [
+                        "童年时期：父母像大树，张开双臂为我们遮风挡雨，那是最纯粹的呵护（Jagaan）。",
+                        "少年时期：我们开始叛逆、想飞，父母的眼神里多了牵挂（Kebimbangan）与严厉的叮咛。",
+                        "成年时期：我们远走高飞去漂泊（Merantau），父母在家中守望，亲情成了永远的支撑（Sokongan）。",
+                        "晚年时期：角色对调，我们搀扶着年迈的父母，这一世的缘分，是循环不断的爱（Kasih sayang）。"
+                    ]
+                }
+            };
+
+            const quizQuestions = [
+                { q: "‘裹’(guǒ) 这个动作通常用在：", a: ["包裹礼物或身体", "切开水果", "写字"], c: 0 },
+                { q: "‘一世情’中，童年时期的父母像：", a: ["小草", "遮风挡雨的大树", "流星"], c: 1 },
+                { q: "‘颤抖’(Menggigil) 可能是因为：", a: ["天气太热", "害怕或严寒", "很开心"], c: 1 },
+                { q: "哪一个词代表‘长辈对晚辈的爱’？", a: ["抱怨", "慈爱(Kasih sayang)", "忙碌"], c: 1 },
+                { q: "‘漂泊’(Merantau) 说明一个人：", a: ["在家里休息", "远离家乡去生活", "在公园散步"], c: 1 },
+                { q: "当父母老了，我们在‘一世情’中应扮演什么角色？", a: ["继续抱怨", "搀扶与报答(Membalas jasa)", "不理不睬"], c: 1 },
+                { q: "‘温馨’(Mesra) 的晚餐通常是指：", a: ["很多贵菜的晚餐", "充满亲情和笑声的晚餐", "一个人吃的晚餐"], c: 1 },
+                { q: "‘支撑’(Sokongan) 一个家的往往是：", a: ["父母的努力与爱", "漂亮的家具", "电视机"], c: 0 },
+                { q: "‘嘱咐’(Berpesan) 的近义词是：", a: ["打骂", "叮嘱", "忘记"], c: 1 },
+                { q: "课文‘一世情’的主旨是：", a: ["要努力工作赚钱", "珍惜这一世不断的亲情", "要多去旅游"], c: 1 }
+            ];
+
+            const handleAnswer = (idx) => {
+                const isCorrect = idx === quizQuestions[quizIndex].c;
+                const newScore = isCorrect ? score + 1 : score;
+                
+                if (quizIndex < quizQuestions.length - 1) {
+                    setScore(newScore);
+                    setQuizIndex(prev => prev + 1);
+                } else {
+                    const finalScore = newScore;
+                    const newRecord = {
+                        date: new Date().toLocaleString(),
+                        score: finalScore,
+                        total: quizQuestions.length
+                    };
+                    setRecords(prev => [newRecord, ...prev]);
+                    setScore(finalScore);
+                    setShowResult(true);
+                }
+            };
+
+            const resetQuiz = () => {
+                setQuizIndex(0);
+                setScore(0);
+                setShowResult(false);
+            };
+
+            return (
+                <div className="min-h-screen text-[#4A3728] pb-10">
+                    <nav className="bg-white px-4 py-3 flex justify-between items-center shadow-sm sticky top-0 z-50">
+                        <div className="flex items-center gap-2">
+                            <Icon name="heart" className="text-red-500 fill-red-500" size={24} />
+                            <h1 className="text-lg font-bold">华文单元三：颂赞温情</h1>
+                        </div>
+                        <div className="flex gap-2">
+                            {activeTab !== 'home' && (
+                                <button onClick={() => setActiveTab('home')} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><Icon name="home" size={20}/></button>
+                            )}
+                            <button onClick={() => setActiveTab('teacher')} className="bg-blue-100 p-2 rounded-full text-blue-600 hover:bg-blue-200"><Icon name="layout-dashboard" size={20}/></button>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-xl mx-auto p-4">
+                        {activeTab === 'home' && (
+                            <div className="space-y-6 pt-4 animate-in">
+                                <div className="bg-orange-400 rounded-3xl p-8 text-white shadow-lg text-center">
+                                    <h2 className="text-2xl font-black mb-2">准备好学习了吗？🎒</h2>
+                                    <p className="opacity-90 text-sm">点击下方按钮开始探索课文</p>
+                                </div>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <button onClick={() => setActiveTab('lesson')} className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-4 border-l-8 border-blue-400 hover:scale-[1.02] transition-all">
+                                        <div className="bg-blue-100 p-3 rounded-xl text-blue-500"><Icon name="book-open" /></div>
+                                        <div className="text-left">
+                                            <h4 className="font-bold text-lg text-blue-800">课文研究 (Isi Pelajaran)</h4>
+                                            <p className="text-xs text-gray-500">深入了解课文内容</p>
+                                        </div>
+                                    </button>
+                                    <button onClick={() => setActiveTab('words')} className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-4 border-l-8 border-orange-400 hover:scale-[1.02] transition-all">
+                                        <div className="bg-orange-100 p-3 rounded-xl text-orange-500"><Icon name="star" /></div>
+                                        <div className="text-left">
+                                            <h4 className="font-bold text-lg text-orange-800">生词闪卡 (Flashcards)</h4>
+                                            <p className="text-xs text-gray-500">快速记忆词义与造句</p>
+                                        </div>
+                                    </button>
+                                    <button onClick={() => setActiveTab('quiz')} className="bg-white p-6 rounded-2xl shadow-md flex items-center gap-4 border-l-8 border-green-400 hover:scale-[1.02] transition-all">
+                                        <div className="bg-green-100 p-3 rounded-xl text-green-500"><Icon name="trophy" /></div>
+                                        <div className="text-left">
+                                            <h4 className="font-bold text-lg text-green-800">闯关练习 (Latihan)</h4>
+                                            <p className="text-xs text-gray-500">回答10道题测试掌握程度</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'lesson' && (
+                            <div className="space-y-6 pt-4 animate-in">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <button onClick={() => setActiveTab('home')} className="p-2"><Icon name="arrow-left" size={20}/></button>
+                                    <h3 className="text-xl font-bold">课文核心内容</h3>
+                                </div>
+                                <div className="bg-white rounded-3xl p-6 shadow-sm border border-blue-100 space-y-8">
+                                    <section>
+                                        <div className="flex items-center gap-2 text-blue-600 mb-3">
+                                            <Icon name="clock" size={20}/>
+                                            <h4 className="font-black text-lg underline decoration-blue-200 decoration-4 underline-offset-4">{lessons.l1.title}</h4>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {lessons.l1.summary.map((s, i) => (
+                                                <div key={i} className="flex gap-2 text-sm leading-relaxed bg-blue-50/50 p-3 rounded-lg border-l-2 border-blue-200">
+                                                    <span className="text-blue-400">✦</span> {s}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                    <section>
+                                        <div className="flex items-center gap-2 text-rose-600 mb-3">
+                                            <Icon name="users" size={20}/>
+                                            <h4 className="font-black text-lg underline decoration-rose-200 decoration-4 underline-offset-4">{lessons.l2.title}</h4>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {lessons.l2.summary.map((s, i) => (
+                                                <div key={i} className="flex gap-2 text-sm leading-relaxed bg-rose-50/50 p-3 rounded-lg border-l-2 border-rose-200">
+                                                    <span className="text-rose-400">♥</span> {s}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                </div>
+                                <button onClick={() => setActiveTab('home')} className="w-full bg-[#4A3728] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
+                                    返回主页
+                                </button>
+                            </div>
+                        )}
+
+                        {activeTab === 'words' && (
+                            <div className="space-y-4 pt-4 animate-in">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-xl font-bold flex items-center gap-2">
+                                        <button onClick={() => setActiveTab('home')}><Icon name="arrow-left" size={20}/></button>
+                                        生词闪卡
+                                    </h3>
+                                    <span className="text-[10px] bg-orange-100 text-orange-600 px-2 py-1 rounded-full uppercase tracking-wider font-bold">点击翻转</span>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {vocabulary.map((item, idx) => (
+                                        <div key={idx} className="h-64 cursor-pointer perspective-1000" onClick={() => setFlippedCard(flippedCard === idx ? null : idx)}>
+                                            <div className={`relative w-full h-full transition-all duration-500 transform-style-3d ${flippedCard === idx ? 'rotate-y-180' : ''}`}>
+                                                <div className="absolute inset-0 backface-hidden bg-white rounded-3xl shadow-md flex flex-col items-center justify-center p-6 text-center">
+                                                    <span className="text-6xl mb-4">{item.emoji}</span>
+                                                    <h4 className="text-3xl font-black text-orange-600">{item.word}</h4>
+                                                    <p className="text-gray-400 font-medium tracking-widest">{item.pinyin}</p>
+                                                </div>
+                                                <div className="absolute inset-0 backface-hidden bg-orange-500 rounded-3xl shadow-md p-6 text-white rotate-y-180 flex flex-col justify-center">
+                                                    <div className="border-b border-white/30 pb-2 mb-3">
+                                                        <h5 className="font-bold text-xl">{item.word} <span className="text-sm font-normal">({item.pinyin})</span></h5>
+                                                        <p className="text-orange-100 font-bold">{item.malay}</p>
+                                                    </div>
+                                                    <div className="space-y-3 text-sm">
+                                                        <p><span className="opacity-70">解释:</span> {item.meaning}</p>
+                                                        <div className="bg-black/10 p-3 rounded-xl italic leading-relaxed text-xs border-l-2 border-white/50">
+                                                            “{item.example}”
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setActiveTab('home')} className="w-full bg-[#4A3728] text-white py-4 rounded-2xl font-bold mt-4">返回首页</button>
+                            </div>
+                        )}
+
+                        {activeTab === 'quiz' && (
+                            <div className="pt-4 animate-in">
+                                {!showResult ? (
+                                    <div className="bg-white rounded-3xl shadow-xl border-t-8 border-green-500 overflow-hidden">
+                                        <div className="p-4 flex justify-between items-center border-b border-gray-100">
+                                            <span className="text-sm font-bold text-green-600">进度: {quizIndex + 1} / {quizQuestions.length}</span>
+                                            <span className="text-sm font-bold text-gray-400">得分: {score}</span>
+                                        </div>
+                                        <div className="p-8">
+                                            <h3 className="text-lg font-bold mb-8 min-h-[60px]">{quizQuestions[quizIndex].q}</h3>
+                                            <div className="space-y-4">
+                                                {quizQuestions[quizIndex].a.map((opt, i) => (
+                                                    <button key={i} onClick={() => handleAnswer(i)} className="w-full text-left p-4 rounded-2xl border-2 border-gray-50 hover:border-green-400 hover:bg-green-50 transition-all font-bold flex justify-between items-center group">
+                                                        {opt}
+                                                        <Icon name="chevron-right" className="text-gray-200 group-hover:text-green-400" size={18} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-white p-10 rounded-3xl text-center shadow-2xl animate-in">
+                                        <Icon name="trophy" className="mx-auto text-yellow-500 mb-4" size={80} />
+                                        <h2 className="text-2xl font-black">测试完成！🎉</h2>
+                                        <div className="text-6xl font-black text-green-600 my-6">{score} <span className="text-2xl text-gray-300">/ {quizQuestions.length}</span></div>
+                                        <p className="text-gray-500 mb-8">成绩已保存至记录中心。</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <button onClick={resetQuiz} className="bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold">重考</button>
+                                            <button onClick={() => setActiveTab('home')} className="bg-green-500 text-white py-4 rounded-2xl font-bold">返回首页</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'teacher' && (
+                            <div className="space-y-6 pt-4 animate-in">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold flex items-center gap-2 text-blue-800">
+                                        <Icon name="layout-dashboard" size={22}/> 成绩记录中心
+                                    </h3>
+                                    <button onClick={() => setActiveTab('home')} className="text-sm bg-gray-100 px-3 py-1 rounded-full font-bold">返回</button>
+                                </div>
+                                {records.length === 0 ? (
+                                    <div className="bg-white p-12 rounded-3xl text-center border-2 border-dashed border-gray-200">
+                                        <p className="text-gray-400">暂无考试记录。</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {records.map((r, i) => (
+                                            <div key={i} className="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center border-l-4 border-green-500">
+                                                <div>
+                                                    <p className="text-xs text-gray-400">{r.date}</p>
+                                                    <p className="font-bold text-gray-700">学生测试记录 #{records.length - i}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xl font-black text-green-600">{r.score} <small className="text-xs text-gray-300">/ {r.total}</small></p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
