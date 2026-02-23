@@ -37,7 +37,7 @@
         const Icon = ({ name, size = 24, className = "" }) => {
             useEffect(() => {
                 lucide.createIcons();
-            }, [name]);
+            }, [name, className]);
             return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
         };
 
@@ -131,11 +131,17 @@
                             <Icon name="heart" className="text-red-500 fill-red-500" size={24} />
                             <h1 className="text-lg font-bold">华文单元三：颂赞温情</h1>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 items-center">
+                            {/* 返回主页按钮 (index.html) */}
+                            <a href="index.html" className="flex items-center gap-1 bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs font-bold hover:bg-black transition-colors">
+                                <Icon name="arrow-left-circle" size={14}/>
+                                返回首页
+                            </a>
+                            {/* 应用内部导航按钮 */}
                             {activeTab !== 'home' && (
-                                <button onClick={() => setActiveTab('home')} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"><Icon name="home" size={20}/></button>
+                                <button onClick={() => setActiveTab('home')} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200" title="返回应用主页"><Icon name="home" size={20}/></button>
                             )}
-                            <button onClick={() => setActiveTab('teacher')} className="bg-blue-100 p-2 rounded-full text-blue-600 hover:bg-blue-200"><Icon name="layout-dashboard" size={20}/></button>
+                            <button onClick={() => setActiveTab('teacher')} className="bg-blue-100 p-2 rounded-full text-blue-600 hover:bg-blue-200" title="管理记录"><Icon name="layout-dashboard" size={20}/></button>
                         </div>
                     </nav>
 
